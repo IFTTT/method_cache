@@ -4,6 +4,7 @@ class Object
   def metaclass; class << self; self; end; end
 end
 
+module Ifttt
 module MethodCache
   class Proxy
     attr_reader :method_name, :opts, :args, :target
@@ -129,6 +130,7 @@ module MethodCache
         @key = ['m', version, arg_string].compact.join('|')
         @key = "m|#{Digest::SHA1.hexdigest(@key)}" if @key.length > 250
       end
+      pp @key
       @key
     end
 
@@ -217,4 +219,5 @@ module MethodCache
       klass.respond_to?(:version) ? "#{klass.name}_#{klass.version(context)}" : klass.name
     end
   end
+end
 end
