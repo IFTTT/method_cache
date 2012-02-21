@@ -210,6 +210,8 @@ module MethodCache
       when defined?(ActiveRecord::Base) && ActiveRecord::Base
         "#{class_key(arg.class)}-#{arg.id}"
       else
+        # such a tricky case. if you want all instances to share the same value then implement #string_hash
+        # otherwise this cache is instance specific
         hash = local? ? arg.hash : Marshal.dump(arg).hash
         "#{class_key(arg.class)}-#{hash}"
       end
