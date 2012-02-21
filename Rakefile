@@ -5,13 +5,13 @@ require 'rake/rdoctask'
 begin
   require 'jeweler'
   Jeweler::Tasks.new do |s|
-    s.name = "method_cache"
+    s.name = "jashmenn-method_cache"
     s.summary = %Q{Simple memcache-based memoization library for Ruby}
     s.email = "code@justinbalthrop.com"
     s.homepage = "http://github.com/ninjudd/method_cache"
     s.description = "Simple memcache-based memoization library for Ruby"
     s.authors = ["Justin Balthrop"]
-    s.add_dependency('memcache', '>= 1.0.0')
+    # s.add_dependency('memcache', '>= 1.0.0')
   end
   Jeweler::GemcutterTasks.new
 rescue LoadError
