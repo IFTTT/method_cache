@@ -130,7 +130,7 @@ module MethodCache
         @key = ['m', version, arg_string].compact.join('|')
         @key = "m|#{Digest::SHA1.hexdigest(@key)}" if @key.length > 250
       end
-      pp @key
+      puts "cache key: #{@key}" if Eigenjoy::MethodCache.verbose?
       @key
     end
 

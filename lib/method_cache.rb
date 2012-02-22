@@ -79,6 +79,10 @@ module MethodCache
     @default_cache ||= {}
   end
 
+  def self.default_cache=(new_cache)
+    @default_cache = new_cache
+  end
+
   def get_ancestors
     ancestors = if self.respond_to?(:ancestors)
                   self.ancestors
@@ -135,6 +139,19 @@ module MethodCache
   def self.disabled?
     @disabled
   end
+
+  def self.verbose(&block)
+    @verbose, old = true, @verbose
+    yield
+  ensure
+    @verbose = old
+  end
+
+  def self.verbose=(v)
+    @verbose = v
+  end
+
+  def self.verbose?; @verbose; end
 
   module InvalidationMethods
     def invalidate_cached_method(method_name, *args, &block)
