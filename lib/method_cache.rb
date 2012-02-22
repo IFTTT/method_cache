@@ -1,7 +1,8 @@
 $:.unshift(File.dirname(__FILE__))
+require 'pp'
 require 'method_cache/proxy'
 
-module Ifttt
+module Eigenjoy
 module MethodCache
   def cache_method(method_name, opts = {})
     method_name = method_name.to_sym
@@ -32,9 +33,10 @@ module MethodCache
     elsif self.class == Module
       # We will alias all methods when the module is mixed-in.
       # include(InvalidationMethods)
+      # pp [:module, self, cached_module_methods]
+
       extend(ModuleAdded) if cached_module_methods.empty?
       cached_module_methods[method_name.to_sym] = proxy
-      # pp [:module, self, cached_module_methods]
     end
   end
 
@@ -90,7 +92,7 @@ module MethodCache
     if method_name
       method_name = method_name.to_sym
       get_ancestors.each do |klass|
-        next unless klass.kind_of?(Ifttt::MethodCache)
+        next unless klass.kind_of?(Eigenjoy::MethodCache)
         # pp [:found, method_name, klass, klass.cached_instance_methods]
         proxy = klass.cached_instance_methods[method_name]
         return proxy if proxy
@@ -105,7 +107,7 @@ module MethodCache
     if method_name
       method_name = method_name.to_sym
       get_ancestors.each do |klass|
-        next unless klass.kind_of?(Ifttt::MethodCache)
+        next unless klass.kind_of?(Eigenjoy::MethodCache)
         proxy = klass.cached_class_methods[method_name]
         return proxy if proxy
       end
@@ -148,7 +150,7 @@ module MethodCache
     end
 
     def without_method_cache(&block)
-      Ifttt::MethodCache.disable(&block)
+      Eigenjoy::MethodCache.disable(&block)
     end
 
   private
@@ -193,14 +195,14 @@ module MethodCache
 
   module ModuleAdded
     def extended(mod)
-      mod.extend(Ifttt::MethodCache)
+      mod.extend(Eigenjoy::MethodCache)
       cached_module_methods.each do |method_name, proxy|
         mod.cache_class_method(method_name, proxy)
       end
     end
 
     def included(mod)
-      mod.extend(Ifttt::MethodCache)
+      mod.extend(Eigenjoy::MethodCache)
       cached_module_methods.each do |method_name, proxy|
         mod.cache_method(method_name, proxy)
       end

@@ -4,7 +4,7 @@ class Object
   def metaclass; class << self; self; end; end
 end
 
-module Ifttt
+module Eigenjoy
 module MethodCache
   class Proxy
     attr_reader :method_name, :opts, :args, :target
@@ -55,7 +55,7 @@ module MethodCache
     end
 
     def value
-      value = opts[:counter] ? cache.count(key) : cache[key] unless MethodCache.disabled?
+      value = opts[:counter] ? cache.count(key) : cache[key] unless Eigenjoy::MethodCache.disabled?
       value = nil unless valid?(:load, value)
 
       if value.nil?
@@ -101,7 +101,7 @@ module MethodCache
 
     def cache
       if @cache.nil?
-        @cache = opts[:cache] || MethodCache.default_cache
+        @cache = opts[:cache] || Eigenjoy::MethodCache.default_cache
         @cache = Memcache.pool[@cache] if @cache.kind_of?(Symbol)
         if not @cache.respond_to?(:[]) and @cache.respond_to?(:get)
           @cache.metaclass.module_eval do
@@ -193,7 +193,7 @@ module MethodCache
     end
 
     def object_key(arg)
-      return "#{class_key(arg.class)}-#{arg.string_hash}" if arg.respond_to?(:string_hash)
+      return "#{class_key(arg.class)}-#{arg.cache_key_qualifier}" if arg.respond_to?(:cache_key_qualifier)
 
       case arg
       when NilClass      then 'nil'
@@ -210,7 +210,7 @@ module MethodCache
       when defined?(ActiveRecord::Base) && ActiveRecord::Base
         "#{class_key(arg.class)}-#{arg.id}"
       else
-        # such a tricky case. if you want all instances to share the same value then implement #string_hash
+        # such a tricky case. if you want all instances to share the same value then implement #cache_key_qualifier
         # otherwise this cache is instance specific
         hash = local? ? arg.hash : Marshal.dump(arg).hash
         "#{class_key(arg.class)}-#{hash}"
