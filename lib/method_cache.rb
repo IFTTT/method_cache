@@ -31,8 +31,10 @@ module MethodCache
 
     elsif self.class == Module
       # We will alias all methods when the module is mixed-in.
+      # include(InvalidationMethods)
       extend(ModuleAdded) if cached_module_methods.empty?
       cached_module_methods[method_name.to_sym] = proxy
+      # pp [:module, self, cached_module_methods]
     end
   end
 
@@ -76,18 +78,20 @@ module MethodCache
   end
 
   def get_ancestors
-    if self.respond_to?(:ancestors)
-      self.ancestors
-    else
-      self.class.ancestors
-    end
+    ancestors = if self.respond_to?(:ancestors)
+                  self.ancestors
+                else
+                  self.class.ancestors
+                end
+    ancestors + extended_modules
   end
 
   def cached_instance_methods(method_name = nil)
     if method_name
       method_name = method_name.to_sym
       get_ancestors.each do |klass|
-        next unless klass.kind_of?(MethodCache)
+        next unless klass.kind_of?(Ifttt::MethodCache)
+        # pp [:found, method_name, klass, klass.cached_instance_methods]
         proxy = klass.cached_instance_methods[method_name]
         return proxy if proxy
       end
@@ -101,7 +105,7 @@ module MethodCache
     if method_name
       method_name = method_name.to_sym
       get_ancestors.each do |klass|
-        next unless klass.kind_of?(MethodCache)
+        next unless klass.kind_of?(Ifttt::MethodCache)
         proxy = klass.cached_class_methods[method_name]
         return proxy if proxy
       end
@@ -144,16 +148,25 @@ module MethodCache
     end
 
     def without_method_cache(&block)
-      MethodCache.disable(&block)
+      Ifttt::MethodCache.disable(&block)
     end
 
   private
 
+    def extended_modules
+      (class << self; self end).included_modules
+    end
+
     def cached_method(method_name, args)
+      # pp [:cached_method, method_name, self, self.get_ancestors, self.class.respond_to?(:cached_instance_methods), extended_modules]
       if self.kind_of?(Class) or self.kind_of?(Module)
         proxy = cached_class_methods(method_name)
       else
-        proxy = self.class.send(:cached_instance_methods, method_name)
+        if self.class.respond_to?(:cached_instance_methods)
+          proxy = self.class.send(:cached_instance_methods, method_name)
+        else
+          proxy = cached_instance_methods(method_name)
+        end
       end
       raise "method '#{method_name}' not cached" unless proxy
       proxy.bind(self, args)
@@ -180,14 +193,14 @@ module MethodCache
 
   module ModuleAdded
     def extended(mod)
-      mod.extend(MethodCache)
+      mod.extend(Ifttt::MethodCache)
       cached_module_methods.each do |method_name, proxy|
         mod.cache_class_method(method_name, proxy)
       end
     end
 
     def included(mod)
-      mod.extend(MethodCache)
+      mod.extend(Ifttt::MethodCache)
       cached_module_methods.each do |method_name, proxy|
         mod.cache_method(method_name, proxy)
       end
