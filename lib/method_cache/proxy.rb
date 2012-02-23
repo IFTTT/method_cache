@@ -59,9 +59,12 @@ module MethodCache
       value = nil unless valid?(:load, value)
 
       if value.nil?
+        puts "cache miss: #{key}" if Eigenjoy::MethodCache.verbose?
         value = target.send(method_name_without_caching, *args)
         raise "non-integer value returned by counter method" if opts[:counter] and not value.kind_of?(Fixnum)
         write_to_cache(key, value) if valid?(:save, value)
+      else
+        puts "cache  hit: #{key}" if Eigenjoy::MethodCache.verbose?
       end
 
       value = nil if value == NULL
@@ -129,8 +132,8 @@ module MethodCache
         end.join('|')
         @key = ['m', version, arg_string].compact.join('|')
         @key = "m|#{Digest::SHA1.hexdigest(@key)}" if @key.length > 250
+        puts "cache  key: #{@key}" if Eigenjoy::MethodCache.verbose?
       end
-      puts "cache key: #{@key}" if Eigenjoy::MethodCache.verbose?
       @key
     end
 
