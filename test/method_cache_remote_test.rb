@@ -5,7 +5,7 @@ PORT    = 19112
 $client = Dalli::Client.new("localhost:#{PORT}")
 
 class FooBar
-  extend MethodCache
+  extend Eigenjoy::MethodCache
 
   cache_method :foo, :cache => $client 
   def foo
