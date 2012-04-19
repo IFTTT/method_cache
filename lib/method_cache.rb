@@ -14,6 +14,7 @@ module MethodCache
 
       if cached_instance_methods.empty?
         include(InvalidationMethods)
+        extend(InvalidationMethods)
         extend(MethodAdded)
       end
 
