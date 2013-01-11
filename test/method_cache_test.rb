@@ -2,7 +2,7 @@ require 'test_helper'
 require 'memcache'
 
 class Foo
-  extend MethodCache
+  extend Eigenjoy::MethodCache
 
   def foo(i)
     @i ||= 0
@@ -43,7 +43,7 @@ class Foo
 end
 
 module Bar
-  extend MethodCache
+  extend Eigenjoy::MethodCache
 
   cache_method :foo
   def foo(i)
@@ -88,7 +88,7 @@ class TestMethodCache < Test::Unit::TestCase
       a.foo(1)
     end
 
-    f3 = MethodCache.disable do
+    f3 = Eigenjoy::MethodCache.disable do
       a.foo(1)
     end
 
