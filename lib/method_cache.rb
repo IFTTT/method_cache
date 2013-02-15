@@ -10,7 +10,7 @@ module MethodCache
     proxy = opts.kind_of?(Proxy) ? opts : Proxy.new(method_name, opts)
 
     if self.class == Class
-      return if instance_methods.include?(proxy.method_name_without_caching)
+      return if instance_methods.include?(proxy.method_name_without_caching.intern)
 
       if cached_instance_methods.empty?
         include(InvalidationMethods)
@@ -45,7 +45,7 @@ module MethodCache
     method_name = method_name.to_sym
     proxy = opts.kind_of?(Proxy) ? opts : Proxy.new(method_name, opts)
 
-    return if methods.include?(proxy.method_name_without_caching)
+    return if methods.include?(proxy.method_name_without_caching.intern)
 
     if cached_class_methods.empty?
       extend(InvalidationMethods)
