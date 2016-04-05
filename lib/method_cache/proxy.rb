@@ -190,7 +190,7 @@ module MethodCache
         else
           cache.set(key, value, expiry(value))
         end
-      rescue Dalli::DalliError => e
+      rescue Error => e
         if e.message =~ /Value too large/
           puts "WARNING #{self.class}: #{key} not written when trying to #write_to_cache. #{e.message}"
           nil
